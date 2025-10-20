@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Design Game - Week 2 Concepts</title>
+    <title>Relational Database Design Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
@@ -918,8 +918,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Database Design Game</h1>
-            <p>Master Week 2 Concepts: Primary Keys, Foreign Keys, and Relationships</p>
+            <h1>Relational Database Design Game</h1>
             <div style="margin-top: 12px;">
                 <button class="btn btn-secondary" onclick="openProjectBrief()" aria-label="Open project brief">Project Brief</button>
             </div>
@@ -1107,13 +1106,15 @@
 
         // Challenge 2: Drag and Drop
         function generateChallenge2(challenge) {
+            // Shuffle column order for randomness each load
+            const shuffled = [...challenge.columns].sort(() => Math.random() - 0.5);
             let html = `
                 <div class="drag-drop-container">
                     <div class="draggable-columns">
                         <h3>Drag Columns Here</h3>
             `;
             
-            challenge.columns.forEach((column, index) => {
+            shuffled.forEach((column, index) => {
                 html += `<div class="column-card" draggable="true" data-column="${column.name}" data-table="${column.table}" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">${column.name}</div>`;
             });
             
