@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Design Game - Week 2 Concepts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #001122 0%, #003366 25%, #C41230 75%, #8B0000 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(196, 18, 48, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(0, 51, 102, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.01em;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 35px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.15);
+            height: 8px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #C41230 0%, #ff4757 50%, #ff6b6b 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(196, 18, 48, 0.4);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .challenge-container {
+            background: rgba(255,255,255,0.98);
+            color: #2c3e50;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #C41230 0%, #003366 100%);
+        }
+
+        .challenge-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #C41230 0%, #003366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        .challenge-instructions {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border-left: 5px solid #C41230;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        /* Challenge 1 Styles */
+        .table-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .table {
+            display: flex;
+            flex-direction: column;
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.08);
+            background: white;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.3rem;
+            letter-spacing: 0.02em;
+        }
+
+        .table-row {
+            display: flex;
+        }
+
+        .column-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 18px;
+            border: 1px solid #e9ecef;
+            font-weight: 600;
+            text-align: center;
+            min-width: 130px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .column-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .column-header:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .column-header:hover::before {
+            left: 100%;
+        }
+
+        .column-header.selected {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .column-header.wrong {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: white;
+            animation: shake 0.5s ease-in-out;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        }
+
+        .column-header.correct {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            animation: pulse 0.6s ease-in-out;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .feedback {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 2px solid #28a745;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #dc3545;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+        }
+
+        /* Challenge 2 Styles */
+        .drag-drop-container {
+            display: flex;
+            gap: 30px;
+            min-height: 400px;
+        }
+
+        .draggable-columns {
+            flex: 1;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .draggable-columns h3 {
+            color: #003366;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .column-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 12px 0;
+            cursor: grab;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .column-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(196, 18, 48, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .column-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            border-color: #C41230;
+        }
+
+        .column-card:hover::before {
+            left: 100%;
+        }
+
+        .column-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .column-card.placed {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .tables-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .table-drop-zone {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 3px dashed #dee2e6;
+            border-radius: 16px;
+            padding: 25px;
+            min-height: 140px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-drop-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(196, 18, 48, 0.05) 50%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .table-drop-zone.drag-over {
+            border-color: #C41230;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            transform: scale(1.03);
+            box-shadow: 0 12px 30px rgba(196, 18, 48, 0.2);
+        }
+
+        .table-drop-zone.drag-over::before {
+            opacity: 1;
+        }
+
+        .table-drop-zone.correct {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .table-drop-zone.wrong {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            animation: shake 0.5s ease-in-out;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .dropped-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .dropped-column {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Challenge 3 Styles */
+        .tables-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .table-box {
+            background: white;
+            border: 2px solid #003366;
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .table-box h4 {
+            color: #003366;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .table-column {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .table-column:hover {
+            background: #f8f9fa;
+            transform: scale(1.05);
+        }
+
+        .table-column.selected {
+            background: #C41230;
+            color: white;
+        }
+
+        .table-column.connected {
+            background: #28a745;
+            color: white;
+        }
+
+        .arrow-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Challenge 4 Styles - Puzzle */
+        .puzzle-container {
+            margin: 20px 0;
+        }
+
+        .puzzle-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .step-indicator {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .step-progress {
+            background: rgba(255,255,255,0.5);
+            height: 8px;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .step-bar {
+            background: linear-gradient(90deg, #C41230 0%, #ff4757 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .puzzle-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .original-table {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            border: 2px solid #dc3545;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+        }
+
+        .table-preview {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .table-row {
+            display: flex;
+        }
+
+        .table-cell {
+            flex: 1;
+            padding: 12px;
+            border-right: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .table-cell:last-child {
+            border-right: none;
+        }
+
+        .table-cell.header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .puzzle-area {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .step-instructions {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .step-instructions h4 {
+            color: #C41230;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .step-instructions p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .drag-zone {
+            display: flex;
+            gap: 30px;
+            min-height: 300px;
+        }
+
+        .data-pieces {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: flex-start;
+        }
+
+        .data-piece {
+            background: linear-gradient(135deg, #C41230 0%, #a00e26 100%);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: grab;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(196, 18, 48, 0.3);
+            user-select: none;
+        }
+
+        .data-piece:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 18, 48, 0.4);
+        }
+
+        .data-piece.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .data-piece.placed {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .drop-zones {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .drop-zone {
+            background: white;
+            border: 3px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 80px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #C41230;
+            background: #fff5f5;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.correct {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .drop-zone.wrong {
+            border-color: #dc3545;
+            background: #fff5f5;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .zone-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .zone-content {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .normalized-table {
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .normalized-table h5 {
+            color: #28a745;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .table-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .field-tag {
+            background: #e8f5e8;
+            color: #28a745;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 4px;
+            display: inline-block;
+        }
+
+        .table-field-zone {
+            min-height: 60px;
+            border: 2px dashed #28a745;
+            background: #f8fff8;
+        }
+
+        .table-field-zone.drag-over {
+            background: #e8f5e8;
+            border-color: #20c997;
+        }
+
+        .puzzle-feedback {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .puzzle-feedback.correct {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .puzzle-feedback.incorrect {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #C41230 0%, #a00e26 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(196, 18, 48, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #a00e26 0%, #8b0a1f 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(196, 18, 48, 0.4);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #001a33 0%, #000d1a 100%);
+            box-shadow: 0 12px 30px rgba(0, 51, 102, 0.4);
+        }
+
+        /* Summary Screen */
+        .summary-container {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .summary-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #C41230 0%, #003366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+        }
+
+        .score-breakdown {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .score-item:hover {
+            background: rgba(196, 18, 48, 0.05);
+            border-radius: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .score-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #C41230 0%, #003366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 10px;
+            padding: 20px 10px;
+            border-radius: 12px;
+            background-color: rgba(196, 18, 48, 0.05);
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .drag-drop-container {
+                flex-direction: column;
+            }
+            
+            .tables-display {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .table-row {
+                flex-direction: column;
+            }
+            
+            .column-header {
+                min-width: auto;
+            }
+            
+            .drag-zone {
+                flex-direction: column;
+            }
+            
+            .data-pieces {
+                order: 2;
+            }
+            
+            .drop-zones {
+                order: 1;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .focus-visible {
+            outline: 3px solid #C41230;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Database Design Game</h1>
+            <p>Master Week 2 Concepts: Primary Keys, Foreign Keys, and Relationships</p>
+            <div style="margin-top: 12px;">
+                <button class="btn btn-secondary" onclick="openProjectBrief()" aria-label="Open project brief">Project Brief</button>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-info">
+                <span id="progressText">Challenge 1 of 3</span>
+                <span class="score">Score: <span id="totalScore">0</span>/300</span>
+            </div>
+        </div>
+
+        <div class="challenge-container" id="challengeContainer">
+            <!-- Challenge content will be dynamically loaded here -->
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousChallenge()" disabled>Previous</button>
+            <button class="btn" id="nextBtn" onclick="nextChallenge()" disabled>Next Challenge</button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <!-- Project Brief Modal -->
+    <div id="projectBriefModal" role="dialog" aria-modal="true" aria-labelledby="projectBriefTitle" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;">
+        <div style="max-width: 760px; margin: 60px auto; background: white; color: #2c3e50; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #C41230 0%, #003366 100%); padding: 18px 24px; color: white; display: flex; align-items: center; justify-content: space-between;">
+                <h3 id="projectBriefTitle" style="margin: 0; font-size: 1.4rem;">Project Brief: Mini Database Design</h3>
+                <button class="btn" onclick="closeProjectBrief()" aria-label="Close">Close</button>
+            </div>
+            <div style="padding: 24px;">
+                <p style="margin-bottom: 12px;">Deliverable: Submit a simple design for a course enrollment system.</p>
+                <ul style="margin-left: 18px; line-height: 1.6;">
+                    <li>Identify primary keys for `STUDENTS`, `COURSES`, `ENROLLMENT`.</li>
+                    <li>Specify foreign keys linking `ENROLLMENT` to `STUDENTS` and `COURSES`.</li>
+                    <li>Write 2-3 sentences explaining each relationship (1:M).</li>
+                    <li>Provide 3 sample rows for each table showing consistent keys.</li>
+                </ul>
+                <p style="margin-top: 16px;">Format: One page (PDF or screenshot) with your tables and annotations.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentChallenge = 1;
+        let totalScore = 0;
+        let challengeScores = [0, 0, 0];
+        let challengeCompleted = [false, false, false];
+        let dragState = {
+            draggedElement: null,
+            sourceTable: null
+        };
+
+        // Challenge Data
+        const challenges = {
+            1: {
+                title: "Mark the Primary Key",
+                instructions: "Click on the column that should be the Primary Key for this table.",
+                table: {
+                    name: "STUDENTS",
+                    columns: [
+                        { name: "Student_ID", isPK: true, explanation: "Student_ID is unique for each student and never changes - perfect for a Primary Key!" },
+                        { name: "Name", isPK: false, explanation: "Names can be duplicated and might change - not suitable for Primary Key." },
+                        { name: "Email", isPK: false, explanation: "Email could change and might not be unique - not ideal for Primary Key." },
+                        { name: "Major", isPK: false, explanation: "Many students can have the same major - not unique enough for Primary Key." },
+                        { name: "GPA", isPK: false, explanation: "GPA can change and multiple students can have the same GPA - not suitable for Primary Key." }
+                    ]
+                }
+            },
+            2: {
+                title: "Drag Columns to Tables",
+                instructions: "Drag each column to the appropriate table. Think about which table each attribute belongs to.",
+                columns: [
+                    { name: "Stud_ID", table: "STUDENTS" },
+                    { name: "Name", table: "STUDENTS" },
+                    { name: "Major", table: "STUDENTS" },
+                    { name: "Course_ID", table: "COURSES" },
+                    { name: "Course_Name", table: "COURSES" },
+                    { name: "Instructor", table: "COURSES" },
+                    { name: "Room", table: "COURSES" }
+                ],
+                tables: ["STUDENTS", "COURSES", "ENROLLMENT"]
+            },
+            3: {
+                title: "Draw the Foreign Keys",
+                instructions: "Click on a column in ENROLLMENT, then click the matching column in STUDENTS or COURSES to create a foreign key relationship.",
+                tables: {
+                    STUDENTS: ["Stud_ID", "Name", "Major"],
+                    COURSES: ["Course_ID", "Course_Name", "Instructor"],
+                    ENROLLMENT: ["Stud_ID", "Course_ID", "Grade"]
+                },
+                relationships: [
+                    { from: "ENROLLMENT.Stud_ID", to: "STUDENTS.Stud_ID" },
+                    { from: "ENROLLMENT.Course_ID", to: "COURSES.Course_ID" }
+                ]
+            }
+        };
+
+        // Initialize Game
+        function initGame() {
+            loadChallenge(1);
+            updateProgress();
+        }
+
+        // Load Challenge
+        function loadChallenge(challengeNum) {
+            const container = document.getElementById('challengeContainer');
+            const challenge = challenges[challengeNum];
+            
+            let html = `
+                <h2 class="challenge-title">Challenge ${challengeNum}: ${challenge.title}</h2>
+                <div class="challenge-instructions">${challenge.instructions}</div>
+            `;
+
+            switch(challengeNum) {
+                case 1:
+                    html += generateChallenge1(challenge);
+                    break;
+                case 2:
+                    html += generateChallenge2(challenge);
+                    break;
+                case 3:
+                    html += generateChallenge3(challenge);
+                    break;
+            }
+
+            container.innerHTML = html;
+            currentChallenge = challengeNum;
+            updateProgress();
+            updateNavigation();
+            
+            // No challenge 4 - project brief is available from header button
+        }
+
+        // Challenge 1: Mark Primary Key
+        function generateChallenge1(challenge) {
+            let html = `
+                <div class="table-container">
+                    <div class="table">
+                        <div class="table-header">${challenge.table.name}</div>
+                        <div class="table-row">
+            `;
+            
+            challenge.table.columns.forEach(column => {
+                html += `<div class="column-header" onclick="selectColumn(this, ${column.isPK}, '${column.explanation}')">${column.name}</div>`;
+            });
+            
+            html += `
+                        </div>
+                    </div>
+                </div>
+                <div id="feedback" class="feedback" style="display: none;"></div>
+            `;
+            
+            return html;
+        }
+
+        function selectColumn(element, isCorrect, explanation) {
+            if (challengeCompleted[0]) return;
+            
+            const feedback = document.getElementById('feedback');
+            element.classList.add(isCorrect ? 'correct' : 'wrong');
+            
+            if (isCorrect) {
+                feedback.textContent = explanation;
+                feedback.className = 'feedback correct';
+                challengeCompleted[0] = true;
+                challengeScores[0] = 100;
+                totalScore += 100;
+                updateScore();
+                triggerConfetti();
+            } else {
+                feedback.textContent = explanation;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            updateNavigation();
+        }
+
+        // Challenge 2: Drag and Drop
+        function generateChallenge2(challenge) {
+            let html = `
+                <div class="drag-drop-container">
+                    <div class="draggable-columns">
+                        <h3>Drag Columns Here</h3>
+            `;
+            
+            challenge.columns.forEach((column, index) => {
+                html += `<div class="column-card" draggable="true" data-column="${column.name}" data-table="${column.table}" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">${column.name}</div>`;
+            });
+            
+            html += `
+                    </div>
+                    <div class="tables-container">
+            `;
+            
+            challenge.tables.forEach(table => {
+                html += `
+                    <div class="table-drop-zone" data-table="${table}" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <div class="table-title">${table}</div>
+                        <div class="dropped-columns" id="${table}-columns"></div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+                <div id="challenge2-feedback" class="feedback" style="display: none;"></div>
+            `;
+            
+            return html;
+        }
+
+        function handleDragStart(e) {
+            dragState.draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const draggedElement = dragState.draggedElement;
+            const targetTable = e.currentTarget.dataset.table;
+            const correctTable = draggedElement.dataset.table;
+            
+            if (targetTable === correctTable) {
+                // Correct placement
+                e.currentTarget.classList.add('correct');
+                draggedElement.classList.add('placed');
+                
+                const columnDiv = document.createElement('div');
+                columnDiv.className = 'dropped-column';
+                columnDiv.textContent = draggedElement.datContent;
+                e.currentTarget.querySelector('.dropped-columns').appendChild(columnDiv);
+                
+                // Check if all columns are placed correctly
+                setTimeout(() => {
+                    checkChallenge2Completion();
+                }, 500);
+            } else {
+                // Wrong placement
+                e.currentTarget.classList.add('wrong');
+                setTimeout(() => {
+                    e.currentTarget.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+
+        function checkChallenge2Completion() {
+            const allPlaced = document.querySelectorAll('.column-card.placed').length === challenges[2].columns.length;
+            if (allPlaced && !challengeCompleted[1]) {
+                challengeCompleted[1] = true;
+                challengeScores[1] = 100;
+                totalScore += 100;
+                updateScore();
+                
+                const feedback = document.getElementById('challenge2-feedback');
+                feedback.textContent = "Excellent! You've correctly organized the columns into their appropriate tables.";
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                
+                triggerConfetti();
+                updateNavigation();
+            }
+        }
+
+        // Challenge 3: Draw Foreign Keys
+        function generateChallenge3(challenge) {
+            let html = `
+                <div class="tables-display">
+                    <canvas class="arrow-canvas" id="arrowCanvas"></canvas>
+            `;
+            
+            Object.entries(challenge.tables).forEach(([tableName, columns]) => {
+                html += `
+                    <div class="table-box" data-table="${tableName}">
+                        <h4>${tableName}</h4>
+                `;
+                columns.forEach(column => {
+                    html += `<div class="table-column" data-table="${tableName}" data-column="${column}" onclick="selectColumnForFK('${tableName}', '${column}')">${column}</div>`;
+                });
+                html += `</div>`;
+            });
+            
+            html += `
+                </div>
+                <div id="challenge3-feedback" class="feedback" style="display: none;"></div>
+            `;
+            
+            return html;
+        }
+
+        let selectedColumn = null;
+        let drawnRelationships = [];
+
+        function selectColumnForFK(tableName, columnName) {
+            if (challengeCompleted[2]) return;
+            
+            if (!selectedColumn) {
+                // First selection
+                if (tableName === 'ENROLLMENT') {
+                    selectedColumn = { table: tableName, column: columnName };
+                    document.querySelector(`[data-table="${tableName}"][data-column="${columnName}"]`).classList.add('selected');
+                }
+            } else {
+                // Second selection
+                if (selectedColumn.table === 'ENROLLMENT' && tableName !== 'ENROLLMENT') {
+                    // Check if this is a valid relationship
+                    const relationship = `${selectedColumn.table}.${selectedColumn.column} → ${tableName}.${columnName}`;
+                    const isValid = challenges[3].relationships.some(rel => 
+                        rel.from === `${selectedColumn.table}.${selectedColumn.column}` && 
+                        rel.to === `${tableName}.${columnName}`
+                    );
+                    
+                    if (isValid) {
+                        // Draw arrow
+                        drawArrow(selectedColumn.table, selectedColumn.column, tableName, columnName);
+                        drawnRelationships.push(relationship);
+                        
+                        // Mark columns as connected
+                        document.querySelector(`[data-table="${selectedColumn.table}"][data-column="${selectedColumn.column}"]`).classList.add('connected');
+                        document.querySelector(`[data-table="${tableName}"][data-column="${columnName}"]`).classList.add('connected');
+                        
+                        // Check completion
+                        if (drawnRelationships.length === challenges[3].relationships.length) {
+                            challengeCompleted[2] = true;
+                            challengeScores[2] = 100;
+                            totalScore += 100;
+                            updateScore();
+                            
+                            const feedback = document.getElementById('challenge3-feedback');
+                            feedback.textContent = "Perfect! You've correctly identified the foreign key relationships. These create 1:M relationships between the tables.";
+                            feedback.className = 'feedback correct';
+                            feedback.style.display = 'block';
+                            
+                            triggerConfetti();
+                            updateNavigation();
+                        }
+                    } else {
+                        // Wrong relationship
+                        document.querySelector(`[data-table="${tableName}"][data-column="${columnName}"]`).classList.add('wrong');
+                        setTimeout(() => {
+                            document.querySelector(`[data-table="${tableName}"][data-column="${columnName}"]`).classList.remove('wrong');
+                        }, 1000);
+                    }
+                }
+                
+                // Reset selection
+                document.querySelectorAll('.table-column.selected').forEach(el => el.classList.remove('selected'));
+                selectedColumn = null;
+            }
+        }
+
+        function drawArrow(fromTable, fromColumn, toTable, toColumn) {
+            const canvas = document.getElementById('arrowCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // Get positions
+            const fromEl = document.querySelector(`[data-table="${fromTable}"][data-column="${fromColumn}"]`);
+            const toEl = document.querySelector(`[data-table="${toTable}"][data-column="${toColumn}"]`);
+            
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            const startX = fromRect.right - canvasRect.left;
+            const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+            const endX = toRect.left - canvasRect.left;
+            const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+            
+            // Draw arrow
+            ctx.strokeStyle = '#C41230';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo((startX + endX) / 2, startY - 50, endX, endY);
+            ctx.stroke();
+            
+            // Draw arrowhead
+            const angle = Math.atan2(endY - startY, endX - startX);
+            const arrowLength = 15;
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - arrowLength * Math.cos(angle - Math.PI / 6), endY - arrowLength * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - arrowLength * Math.cos(angle + Math.PI / 6), endY - arrowLength * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+
+        // Challenge 4: Database Normalization Puzzle
+        function generateChallenge4(challenge) {
+            let html = `
+                <div class="puzzle-container">
+                    <div class="puzzle-header">
+                        <h3 style="text-align: center; color: #C41230; margin-bottom: 20px; font-size: 1.4rem;">🧩 Normalization Puzzle</h3>
+                        <div class="step-indicator">
+                            <span id="current-step">Step 1 of 5</span>
+                            <div class="step-progress">
+                                <div class="step-bar" id="step-progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="puzzle-content">
+                        <div class="original-table">
+                            <h4 style="color: #003366; margin-bottom: 15px;">📋 Original Table (Needs Normalization)</h4>
+                            <div class="table-preview">
+                                <div class="table-row">
+                                    <div class="table-cell header">Employee_ID</div>
+                                    <div class="table-cell header">Name</div>
+                                    <div class="table-cell header">Department</div>
+                                    <div class="table-cell header">Manager</div>
+                                    <div class="table-cell header">Projects</div>
+                                    <div class="table-cell header">Salary</div>
+                                </div>
+                                <div class="table-row">
+                                    <div class="table-cell">E001</div>
+                                    <div class="table-cell">John Smith</div>
+                                    <div class="table-cell">IT</div>
+                                    <div class="table-cell">Sarah Johnson</div>
+                                    <div class="table-cell">P1, P2, P3</div>
+                                    <div class="table-cell">75000</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="puzzle-area">
+                            <div class="step-instructions">
+                                <h4 id="step-title">Step 1: Identify Primary Key</h4>
+                                <p id="step-description">Drag the correct primary key to the PK area</p>
+                            </div>
+                            
+                            <div class="drag-zone">
+                                <div class="data-pieces" id="data-pieces">
+                                    <!-- Data pieces will be generated dynamically -->
+                                </div>
+                                
+                                <div class="drop-zones">
+                                    <div class="drop-zone pk-zone" id="pk-zone">
+                                        <div class="zone-label">Primary Key</div>
+                                        <div class="zone-content"></div>
+                                    </div>
+                                    
+                                    <div class="normalized-tables" id="normalized-tables">
+                                        <!-- Normalized tables will appear as steps progress -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="puzzle-feedback" id="puzzle-feedback" style="display: none;"></div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Challenge 4: Puzzle State
+        let currentPuzzleStep = 1;
+        let puzzleCompleted = false;
+
+        // Challenge 4: Initialize Puzzle
+        function initializePuzzle() {
+            currentPuzzleStep = 1;
+            puzzleCompleted = false;
+            updatePuzzleStep();
+            generateDataPieces();
+        }
+
+        function updatePuzzleStep() {
+            const stepData = challenges[4].steps[currentPuzzleStep - 1];
+            document.getElementById('step-title').textContent = stepData.title;
+            document.getElementById('step-description').textContent = stepData.description;
+            document.getElementById('current-step').textContent = `Step ${currentPuzzleStep} of 5`;
+            
+            // Update progress bar
+            const progress = (currentPuzzleStep - 1) / 5 * 100;
+            document.getElementById('step-progress-bar').style.width = progress + '%';
+        }
+
+        function generateDataPieces() {
+            const dataPiecesContainer = document.getElementById('data-pieces');
+            const stepData = challenges[4].steps[currentPuzzleStep - 1];
+            
+            dataPiecesContainer.innerHTML = '';
+            
+            stepData.data.forEach(item => {
+                const piece = document.createElement('div');
+                piece.className = 'data-piece';
+                piece.textContent = item;
+                piece.draggable = true;
+                piece.dataset.item = item;
+                
+                // Remove any existing listeners first
+                piece.removeEventListener('dragstart', handlePuzzleDragStart);
+                piece.removeEventListener('dragend', handlePuzzleDragEnd);
+                
+                // Add new listeners
+                piece.addEventListener('dragstart', handlePuzzleDragStart);
+                piece.addEventListener('dragend', handlePuzzleDragEnd);
+                
+                dataPiecesContainer.appendChild(piece);
+            });
+        }
+
+        function handlePuzzleDragStart(e) {
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.dataset.item);
+            console.log('Drag started with item:', e.target.dataset.item);
+        }
+
+        function handlePuzzleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handlePuzzleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const item = e.dataTransfer.getData('text/plain');
+            const stepData = challenges[4].steps[currentPuzzleStep - 1];
+            
+            console.log('Dropped item:', item, 'Expected:', stepData.correct, 'Step:', currentPuzzleStep);
+            
+            // For steps 1-2, check if the correct item is dropped
+            if (currentPuzzleStep <= 2) {
+                if (item === stepData.correct) {
+                    // Correct answer
+                    e.target.classList.add('correct');
+                    const zoneContent = e.target.querySelector('.zone-content');
+                    if (zoneContent) {
+                        zoneContent.textContent = item;
+                    }
+                    
+                    // Mark piece as placed
+                    const piece = document.querySelector(`[data-item="${item}"]`);
+                    if (piece) {
+                        piece.classList.add('placed');
+                    }
+                    
+                    // Show feedback
+                    showPuzzleFeedback('correct', `Great! ${item} is correct.`);
+                    
+                    // Move to next step
+                    setTimeout(() => {
+                        nextPuzzleStep();
+                    }, 1500);
+                } else {
+                    // Wrong answer
+                    e.target.classList.add('wrong');
+                    showPuzzleFeedback('incorrect', `Try again. ${item} is not the correct answer for this step.`);
+                    
+                    setTimeout(() => {
+                        e.target.classList.remove('wrong');
+                    }, 1000);
+                }
+            } else {
+                // For steps 3-5, add the field to the table
+                addFieldToTable(item, e.target);
+            }
+        }
+
+        function nextPuzzleStep() {
+            if (currentPuzzleStep < 5) {
+                currentPuzzleStep++;
+                console.log('Moving to step:', currentPuzzleStep);
+                updatePuzzleStep();
+                generateDataPieces();
+                
+                // Clear previous drop zones
+                document.querySelectorAll('.drop-zone').forEach(zone => {
+                    zone.classList.remove('correct', 'wrong', 'drag-over');
+                    const zoneContent = zone.querySelector('.zone-content');
+                    if (zoneContent) {
+                        zoneContent.textContent = '';
+                    }
+                });
+                
+                // Add new drop zones for table creation steps
+                if (currentPuzzleStep >= 3) {
+                    createTableDropZones();
+                }
+                
+                // Re-add handlers for new elements
+                setTimeout(() => {
+                    addChallenge4Handlers();
+                }, 100);
+            } else {
+                // Puzzle completed
+                completePuzzle();
+            }
+        }
+
+        function addFieldToTable(fieldName, dropZone) {
+            const stepData = challenges[4].steps[currentPuzzleStep - 1];
+            const tableFields = document.getElementById(`${stepData.table.toLowerCase()}-fields`);
+            
+            if (tableFields) {
+                // Create a field tag
+                const fieldTag = document.createElement('div');
+                fieldTag.className = 'field-tag';
+                fieldTag.textContent = fieldName;
+                tableFields.appendChild(fieldTag);
+                
+                // Mark the data piece as placed
+                const piece = document.querySelector(`[data-item="${fieldName}"]`);
+                if (piece) {
+                    piece.classList.add('placed');
+                }
+                
+                // Check if all required fields are added
+                const requiredFields = stepData.data;
+                const addedFields = tableFields.querySelectorAll('.field-tag');
+                
+                if (addedFields.length >= requiredFields.length) {
+                    showPuzzleFeedback('correct', `Great! ${stepData.table} table is complete.`);
+                    setTimeout(() => {
+                        nextPuzzleStep();
+                    }, 1500);
+                } else {
+                    showPuzzleFeedback('correct', `Added ${fieldName} to ${stepData.table}. Keep adding fields!`);
+                }
+            }
+        }
+
+        function createTableDropZones() {
+            const normalizedTables = document.getElementById('normalized-tables');
+            const stepData = challenges[4].steps[currentPuzzleStep - 1];
+            
+            if (stepData.table) {
+                const tableDiv = document.createElement('div');
+                tableDiv.className = 'normalized-table';
+                tableDiv.innerHTML = `
+                    <h5>${stepData.table}</h5>
+                    <div class="table-fields" id="${stepData.table.toLowerCase()}-fields">
+                        <div class="drop-zone table-field-zone">
+                            <div class="zone-label">Drop fields here</div>
+                            <div class="zone-content"></div>
+                        </div>
+                    </div>
+                `;
+                normalizedTables.appendChild(tableDiv);
+                
+                console.log('Created table drop zone for:', stepData.table);
+            }
+        }
+
+        function completePuzzle() {
+            puzzleCompleted = true;
+            challengeCompleted[3] = true;
+            challengeScores[3] = 100;
+            totalScore += 100;
+            updateScore();
+            
+            const feedback = document.getElementById('puzzle-feedback');
+            feedback.textContent = "🎉 Congratulations! You've successfully normalized the database! All tables are now properly structured.";
+            feedback.className = 'puzzle-feedback correct';
+            feedback.style.display = 'block';
+            
+            triggerConfetti();
+            updateNavigation();
+        }
+
+        function showPuzzleFeedback(type, message) {
+            const feedback = document.getElementById('puzzle-feedback');
+            feedback.textContent = message;
+            feedback.className = `puzzle-feedback ${type}`;
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 2000);
+        }
+
+        // Add drag and drop handlers for Challenge 4
+        function addChallenge4Handlers() {
+            // Clear existing handlers
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.ondragover = null;
+                zone.ondrop = null;
+                zone.ondragleave = null;
+            });
+            
+            // Add new handlers
+            const dropZones = document.querySelectorAll('.drop-zone');
+            console.log('Found drop zones:', dropZones.length);
+            
+            dropZones.forEach((zone, index) => {
+                console.log('Setting up drop zone', index);
+                
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    this.classList.add('drag-over');
+                    console.log('Drag over drop zone');
+                });
+                
+                zone.addEventListener('dragleave', function(e) {
+                    this.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', function(e) {
+                    console.log('Drop event triggered');
+                    handlePuzzleDrop(e);
+                });
+            });
+        }
+
+        // Navigation Functions
+        function nextChallenge() {
+            if (currentChallenge < 3) {
+                loadChallenge(currentChallenge + 1);
+            } else {
+                showSummary();
+            }
+        }
+
+        function previousChallenge() {
+            if (currentChallenge > 1) {
+                loadChallenge(currentChallenge - 1);
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentChallenge === 1;
+            
+            if (currentChallenge === 3) {
+                nextBtn.textContent = 'View Summary';
+                nextBtn.disabled = !challengeCompleted[2];
+            } else {
+                nextBtn.textContent = 'Next Challenge';
+                nextBtn.disabled = !challengeCompleted[currentChallenge - 1];
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            const progress = (currentChallenge - 1) / 3 * 100;
+            progressFill.style.width = progress + '%';
+            progressText.textContent = `Challenge ${currentChallenge} of 3`;
+        }
+
+        function updateScore() {
+            document.getElementById('totalScore').textContent = totalScore;
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function showSummary() {
+            const container = document.getElementById('challengeContainer');
+            const totalPossible = 300;
+            const percentage = Math.round((totalScore / totalPossible) * 100);
+            
+            let performance = "Excellent!";
+            if (percentage < 60) performance = "Keep practicing!";
+            else if (percentage < 80) performance = "Good job!";
+            else if (percentage < 100) performance = "Great work!";
+            
+            container.innerHTML = `
+                <div class="summary-container">
+                    <h2 class="summary-title">🎉 Congratulations! 🎉</h2>
+                    <p style="font-size: 1.3rem; margin-bottom: 30px;">You've completed the Database Design Game!</p>
+                    
+                    <div class="score-breakdown">
+                        <h3 style="color: #003366; margin-bottom: 20px;">Your Performance</h3>
+                        <div class="score-item">
+                            <span>Challenge 1: Primary Keys</span>
+                            <span>${challengeScores[0]}/100</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Challenge 2: Table Organization</span>
+                            <span>${challengeScores[1]}/100</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Challenge 3: Foreign Keys</span>
+                            <span>${challengeScores[2]}/100</span>
+                        </div>
+                        
+                        <div class="score-item">
+                            <span>Total Score</span>
+                            <span>${totalScore}/${totalPossible} (${percentage}%)</span>
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 1.2rem; margin: 20px 0; color: #C41230; font-weight: bold;">${performance}</p>
+                    
+                    <button class="btn" onclick="restartGame()" style="margin-top: 20px;">Play Again</button>
+                    <button class="btn btn-secondary" onclick="openProjectBrief()" style="margin-top: 20px; margin-left: 10px;">View Project Brief</button>
+                </div>
+            `;
+            
+            // Final confetti celebration
+            setTimeout(() => {
+                confetti({
+                    particleCount: 200,
+                    spread: 100,
+                    origin: { y: 0.5 }
+                });
+            }, 500);
+        }
+
+        function restartGame() {
+            currentChallenge = 1;
+            totalScore = 0;
+            challengeScores = [0, 0, 0];
+            challengeCompleted = [false, false, false];
+            drawnRelationships = [];
+            selectedColumn = null;
+            
+            initGame();
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+
+        // Project Brief modal controls
+        function openProjectBrief() {
+            const modal = document.getElementById('projectBriefModal');
+            modal.style.display = 'block';
+        }
+        function closeProjectBrief() {
+            const modal = document.getElementById('projectBriefModal');
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
